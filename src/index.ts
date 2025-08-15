@@ -8,30 +8,31 @@ async function runClient() {
     // Create stdio transport to connect to the MCP server
     const transport = new StdioClientTransport({
       command: "node",
-      args: ["E:/DEV/Proyects/MCPs/0.2-calculator-server/src/index.ts"],
+      args: ["E:/DEV/Proyects/MCPs/0.2-calculator-server/build/index.js"],
     });
 
+    // Create client instance
     const client = new Client({
       name: "calculator-client",
       version: "1.0.0",
     });
 
-    console.log("🔗 Connecting to MCP Server...");
+    console.log("📡 Connecting to MCP server...");
 
     // Connect to the server
     await client.connect(transport);
 
-    console.log("🎉 Connected to MCP server successfully!");
+    console.log("✅ Connected to MCP server successfully!");
 
     // List available tools
-    console.log("\n 📋 Listing available tools");
+    console.log("\n📋 Listing available tools:");
     const tools = await client.listTools();
     tools.tools.forEach((tool) => {
-      console.log(` - ${tool.name}: ${tool.description}`);
+      console.log(`  - ${tool.name}: ${tool.description}`);
     });
 
     // Test calculator operations
-    console.log(`\n Testing calculator operations:`);
+    console.log("\n🧮 Testing Calculator Operations:");
 
     // Addition
     const addResult = await client.callTool({
@@ -41,7 +42,7 @@ async function runClient() {
         b: 3,
       },
     });
-    console.log(`Add 5 + 3 =${extractTextResult(addResult)}`);
+    console.log(`Add 5 + 3 = ${extractTextResult(addResult)}`);
 
     // Subtraction
     const subtractResult = await client.callTool({
@@ -51,7 +52,7 @@ async function runClient() {
         b: 4,
       },
     });
-    console.log(`Subtract 10 - 4 = ${extractTextResult(addResult)}`);
+    console.log(`Subtract 10 - 4 = ${extractTextResult(subtractResult)}`);
 
     // Multiplication
     const multiplyResult = await client.callTool({
@@ -61,7 +62,7 @@ async function runClient() {
         b: 7,
       },
     });
-    console.log(`Multiply 6 * 7 = ${extractTextResult(addResult)}`);
+    console.log(`Multiply 6 × 7 = ${extractTextResult(multiplyResult)}`);
 
     // Division
     const divideResult = await client.callTool({
@@ -71,14 +72,13 @@ async function runClient() {
         b: 4,
       },
     });
-    console.log(`Divide 20 / 4 = ${extractTextResult(addResult)}`);
+    console.log(`Divide 20 ÷ 4 = ${extractTextResult(divideResult)}`);
 
     // Help
     const helpResult = await client.callTool({
       name: "help",
       arguments: {},
     });
-
     console.log(`\n📖 Help Information:`);
     console.log(extractTextResult(helpResult));
 
@@ -103,7 +103,7 @@ async function runClient() {
       }
     } catch (error: any) {
       console.log(
-        " No resource available or error listing resource:",
+        "  No resources available or error listing resources:",
         error.message
       );
     }
@@ -118,12 +118,12 @@ async function runClient() {
 
       // Test getting a prompt if available
       if (prompts.prompts.length > 0) {
-        const firtPrompt = prompts.prompts[0];
-        console.log(`\n💬 Reading prompt: ${firtPrompt.name}`);
+        const firstPrompt = prompts.prompts[0];
+        console.log(`\n💬 Getting prompt: ${firstPrompt.name}`);
         const promptResult = await client.getPrompt({
-          name: firtPrompt.name,
+          name: firstPrompt.name,
           arguments: {
-            code: "console.log('Hello, MCP');",
+            code: "console.log('Hello, MCP!');",
           },
         });
         console.log(`Prompt result: ${JSON.stringify(promptResult, null, 2)}`);
@@ -143,9 +143,8 @@ async function runClient() {
 }
 
 /**
- *  Extract the text result from a tool call response
+ * Extract the text result from a tool call response
  */
-
 function extractTextResult(result: any): string {
   try {
     if (result && result.content && Array.isArray(result.content)) {
@@ -157,11 +156,12 @@ function extractTextResult(result: any): string {
 
     // Fallback: stringify the entire result
     return JSON.stringify(result, null, 2);
-  } catch (error) {
+  } catch {
     return result?.toString() || "No result";
   }
 }
 
+// Error handling wrapper
 async function main() {
   try {
     await runClient();
