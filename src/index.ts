@@ -28,4 +28,17 @@ class MCPClient {
       }
     );
   }
+
+  async connectToServer(transport: Transport) {
+    await this.client.connect(transport);
+    this.run();
+    console.error("MCPClient started on stdin/stdout");
+  }
+
+  async run() {
+    console.log("Asking server for available tools");
+
+    //listing tools
+    const toolsResult = await this.client.listTools();
+  }
 }
