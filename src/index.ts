@@ -35,9 +35,9 @@ class MCPClient {
         console.error("MCPClient started on stdin/stdout");
     }
 
-    openAIToolAdapter(tool: {
+    openAiToolAdapter(tool: {
         name: string;
-        description: string;
+        description?: string;
         input_schema: any;
     }) {
         // Create a zod schema based on the input_schema
@@ -56,11 +56,16 @@ class MCPClient {
             }
         }
 
-  async run() {
-            console.log("Asking server for available tools");
-
-            //listing tools
-            const toolsResult = await this.client.listTools();
-        }
+    }
+    async run() {
+        console.log("Asking server for available tools");
+        const toolsResult = await this.client.listTools();
+        const tools = toolsResult.tools.map((tool) => {
+            return this.openAiToolAdapter({
+                name: tool.name,
+                description: tool.description,
+                input_schema: tool.inputSchema,
+            });
+        });
     }
 }
