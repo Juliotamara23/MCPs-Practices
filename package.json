@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.4",
+    "openai": "^5.15.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
