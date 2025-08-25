@@ -3,6 +3,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import OpenAI from "openai";
 import { z } from "zod"; // Import zod for schema validation
+import "dotenv/config";
 
 class MCPClient {
   private openai: OpenAI;
@@ -10,7 +11,7 @@ class MCPClient {
 
   constructor() {
     this.openai = new OpenAI({
-      baseURL: "https://models.inference.ai.azure.com",
+      baseURL: "https://models.github.ai/inference",
       apiKey: process.env.GITHUB_TOKEN,
     });
 
@@ -64,8 +65,8 @@ class MCPClient {
     toolResults: any[]
   ) {
     for (const tool_call of tool_calls) {
-      const toolName = tool_call.function.name;
-      const args = tool_call.function.arguments;
+      const toolName = tool_call.id;
+      const args = tool_call.type;
 
       console.log(`Calling tool ${toolName} with args ${JSON.stringify(args)}`);
 
@@ -124,3 +125,11 @@ class MCPClient {
     });
   }
 }
+
+let client = new MCPClient();
+const transport = new StdioClientTransport({
+  command: "node",
+  args: ["E:/DEV/Proyects/MCPs/0.2-calculator-server/build/index.js"],
+});
+
+client.connectToServer(transport);
