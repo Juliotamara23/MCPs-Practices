@@ -65,8 +65,9 @@ class MCPClient {
     toolResults: any[]
   ) {
     for (const tool_call of tool_calls) {
-      const toolName = tool_call.id;
-      const args = tool_call.type;
+      if (tool_call.type !== 'function') continue;
+      const toolName = tool_call.function.name;
+      const args = tool_call.function.arguments;
 
       console.log(`Calling tool ${toolName} with args ${JSON.stringify(args)}`);
 
@@ -106,7 +107,7 @@ class MCPClient {
     console.log("Querying LLM: ", messages[0].content);
 
     // 2. Calling the LLM
-    let response = this.openai.chat.completions.create({
+    let response = await this.openai.chat.completions.create({
       model: "gpt-4o-mini",
       max_tokens: 1000,
       messages,
@@ -116,11 +117,11 @@ class MCPClient {
     let results: any[] = [];
 
     // 3. Go through the LLM response, for each choice, check if it has tool calls
-    (await response).choices.map(async (choice: { message: any }) => {
+    response.choices.forEach(async (choice) => {
       const message = choice.message;
-      if (message.tools_calls) {
+      if (message.tool_calls) {
         console.log("Making tool call");
-        await this.callTools(message.tool_call, results);
+        await this.callTools(message.tool_calls, results);
       }
     });
   }
