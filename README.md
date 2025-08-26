@@ -51,12 +51,12 @@ El cliente realiza los siguientes pasos:
 
 1. **Conexión**: Se conecta al servidor MCP usando StdioClientTransport.
 
-``
+```text
 const transport = new StdioClientTransport({
   command: "node",
   args: ["0.2-calculator-server/build/index.js"],
 });
-``
+```
 
 **Nota**: El path del servidor debe ser el relativo y exacto por ejemplo: ``C:MCP/build/index.js``
 
@@ -73,5 +73,14 @@ Ejemplo de prompt: “What is the sum of 2 and 3?”
 - **LLM**: GPT‑4o mini genera llamadas a herramientas basadas en el prompt.
 - **Servidor**: Ejecuta las herramientas y devuelve resultados.
 
-### Ejecución de pruebas
-El cliente MCP incluye pruebas para validar las herramientas y los flujos básicos. Asegúrese de que el servidor MCP esté ejecutándose antes de iniciar el cliente.
+### Resultado al ejecutar
+El cliente MCP te debera imprimir en consola lo siguiente:
+
+```text
+Asking server for available tools
+MCPClient started on stdin/stdout
+Querying LLM:  What is the sum of 2 and 3?
+Making tool call
+Calling tool add with args "{\"a\":2,\"b\":3}"
+Tool result:  { content: [ { type: 'text', text: '5' } ] }
+```
