@@ -1,18 +1,18 @@
-# <h1 align="center">Calculator Server con Model Context Protocol</h1>
+# <h1 align="center">Servidor MCP para Cálculos Básicos</h1>
 
 El presente proyecto es un servidor MCP (Model Context Protocol) que ofrece varias herramientas útiles para realizar cálculos básicos y personalizados. El objetivo principal de este proyecto es practicar lo aprendido durante el curso de **MCP for beginers**: `https://github.com/microsoft/mcp-for-beginners`.
 
 ## Tecnologías utilizadas
 
-*   Node.js
-*   TypeScript
-*   `@modelcontextprotocol/sdk` para el protocolo MCP
-*   `zod` para validación de datos
-*   `stdio.js` para transporte de datos
+- Node.js
+- TypeScript
+- `@modelcontextprotocol/sdk` para el protocolo MCP
+- `zod` para validación de datos
+- `stdio.js` para transporte de datos
 
 ## Instalación y ejecución del proyecto
 
-1.  Clone el repositorio localmente: `git clone -b 0.2-calculator-server https://github.com/username/calculator-server.git`
+1.  Clone el repositorio localmente: `git clone -b 0.2-calculator-server https://github.com/Juliotamara23/MCPs-Practices.git`
 2.  Instale las dependencias: `npm install`
 3.  Ejecuta el comando de construcción y ejecución: `npm run build` y luego `npm start`
 
@@ -20,12 +20,12 @@ El presente proyecto es un servidor MCP (Model Context Protocol) que ofrece vari
 
 El proyecto implementa un servidor MCP que ofrece varias herramientas:
 
-*   **add**: suma dos números
-*   **subtract**: resta dos números
-*   **multiply**: multiplica dos números
-*   **divide**: divide dos números
-*   **help**: muestra la ayuda y las instrucciones de uso para cada herramienta
-*   **greeting**: muestra un mensaje personalizado con el nombre del usuario
+- **add**: suma dos números
+- **subtract**: resta dos números
+- **multiply**: multiplica dos números
+- **divide**: divide dos números
+- **help**: muestra la ayuda y las instrucciones de uso para cada herramienta
+- **greeting**: muestra un mensaje personalizado con el nombre del usuario
 
 ## Explicación técnica
 
