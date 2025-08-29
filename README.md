@@ -1,4 +1,4 @@
-# <h1 align="center"> MCPs-Practices </h1>
+# <h1 align="center">![](https://badge.mcpx.dev 'MCP') MCPs-Practices </h1> 
 
 Este repositorio contiene una colección de prácticas y ejemplos relacionados con el Model Context Protocol (MCP), siguiendo el curso de [MCP for Beginners](https://github.com/microsoft/mcp-for-beginners) de Microsoft.
 
