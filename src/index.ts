@@ -7,7 +7,22 @@ export const server = new McpServer({
   version: "1.0.0",
 });
 
-server.tool("random-joke", )
+server.tool(
+  "random-joke",
+  "Un chiste devuuelto por la API de Chuck Norris",
+  {},
+  async () => {
+    const response = await fetch("https://api.chucknorris.io/jokes/random");
+    const data = await response.json();
+    
+    return {
+        content: [{
+            type: "text",
+            text: data.value
+        }]
+    }
+  }
+);
 
 const app = express();
 export const transports: { [sessinId: string]: SSEServerTransport } = {};
