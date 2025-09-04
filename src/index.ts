@@ -84,6 +84,7 @@ server.tool(
   }
 );
 
+// Herramienta para obtener un chiste aleatorio de Chuck Norris.
 server.tool(
   "random-joke",
   "Devuelve un chiste aleatorio de Chuck Norris.",
@@ -131,6 +132,7 @@ server.tool(
   }
 );
 
+// Herramienta para obtener un chiste aleatorio de Chuck Norris por categoría.
 server.tool(
   "random-joke-by-category",
   { category: z.string().describe("La categoría del chiste de Chuck Norris.") },
