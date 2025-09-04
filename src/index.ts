@@ -1,6 +1,7 @@
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Request, Response } from "express";
+import z from "zod";
 const express = require("express");
 
 const server = new McpServer({
@@ -31,7 +32,7 @@ app.post("/messages", async (req: Request, res: Response) => {
   }
 });
 
-// Herramientas: Chistes aleatorios y por categoría
+// Herramientas: Lista las categorías disponibles de los chistes de Chuck Norris
 server.tool(
   "joke-category",
   "Categoria de chiste devuelto por la API de Chuck Norris",
@@ -64,7 +65,7 @@ server.tool(
 
 server.tool(
   "random-joke",
-  "Un chiste devuelto por la API de Chuck Norris",
+  "Un chiste devuelto por la API de Chuck Norris.",
   {},
   async () => {
     const response = await fetch("https://api.chucknorris.io/jokes/random");
@@ -78,6 +79,49 @@ server.tool(
         },
       ],
     };
+  }
+);
+
+server.tool(
+  "random-joke-by-category",
+  { category: z.string().describe("La categoría del chiste de Chuck Norris.") },
+  async ({ category }) => {
+    try {
+      const response = await fetch(
+        `https://api.chucknorris.io/jokes/random?category=${category}`
+      );
+      const data = await response.json();
+
+      if (data.value) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: data.value,
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "No se encontró un chiste en la categoría especificada.",
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      console.log("Error al obtener el chiste:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Error al obtener el chiste.",
+          },
+        ],
+      };
+    }
   }
 );
 
