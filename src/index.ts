@@ -35,27 +35,48 @@ app.post("/messages", async (req: Request, res: Response) => {
 // Herramientas: Lista las categorías disponibles de los chistes de Chuck Norris
 server.tool(
   "joke-category",
-  "Categoria de chiste devuelto por la API de Chuck Norris",
-  {},
-  async () => {
-    const response = await fetch("https://api.chucknorris.io/jokes/categories");
-    const data = await response.json();
+  "Lista las categorias disponibles de los chiste devuelto por la API de Chuck Norris",
+  { categories: z.string().describe("Categoría de chiste") },
+  async (categories) => {
+    try {
+      const response = await fetch(
+        `https://api.chucknorris.io/jokes/${categories}`
+      );
 
-    if (Array.isArray(data)) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        return {
+          content: [
+            {
+              type: "text",
+              text:
+                "Categorías disponibles:\n" +
+                data.map((category) => `• ${category}`).join("\n"),
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "No se pudieron obtener las categorías.",
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      console.error("Error al obtener las categorías:", error);
       return {
         content: [
           {
             type: "text",
-            text: data.map((category) => `• ${category}`).join("\n"),
-          },
-        ],
-      };
-    } else {
-      return {
-        content: [
-          {
-            type: "text",
-            text: data,
+            text: "Ocurrió un error al intentar obtener las categorías.",
           },
         ],
       };
@@ -65,7 +86,11 @@ server.tool(
 
 server.tool(
   "random-joke",
-  "Un chiste devuelto por la API de Chuck Norris.",
+  {
+    category: z
+      .string()
+      .describe("Un chiste devuelto por la API de Chuck Norris."),
+  },
   {},
   async () => {
     const response = await fetch("https://api.chucknorris.io/jokes/random");
@@ -90,6 +115,11 @@ server.tool(
       const response = await fetch(
         `https://api.chucknorris.io/jokes/random?category=${category}`
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.value) {
