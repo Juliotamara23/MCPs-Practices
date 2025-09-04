@@ -34,13 +34,13 @@ app.post("/messages", async (req: Request, res: Response) => {
 
 // Herramientas: Lista las categorías disponibles de los chistes de Chuck Norris
 server.tool(
-  "joke-category",
+  "joke-categories",
   "Lista las categorias disponibles de los chiste devuelto por la API de Chuck Norris",
-  { categories: z.string().describe("Categoría de chiste") },
-  async (categories) => {
+  {},
+  async () => {
     try {
       const response = await fetch(
-        `https://api.chucknorris.io/jokes/${categories}`
+        `https://api.chucknorris.io/jokes/categories`
       );
 
       if (!response.ok) {
@@ -56,7 +56,7 @@ server.tool(
               type: "text",
               text:
                 "Categorías disponibles:\n" +
-                data.map((category) => `• ${category}`).join("\n"),
+                data.map((categories) => `• ${categories}`).join("\n"),
             },
           ],
         };
@@ -86,24 +86,48 @@ server.tool(
 
 server.tool(
   "random-joke",
-  {
-    category: z
-      .string()
-      .describe("Un chiste devuelto por la API de Chuck Norris."),
-  },
+  "Devuelve un chiste aleatorio de Chuck Norris.",
   {},
   async () => {
-    const response = await fetch("https://api.chucknorris.io/jokes/random");
-    const data = await response.json();
+    try {
+      const response = await fetch("https://api.chucknorris.io/jokes/random");
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: data.value,
-        },
-      ],
-    };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.value) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: data.value,
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "No se pudo obtener un chiste aleatorio.",
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      console.error("Error al obtener un chiste aleatorio:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Ocurrió un error al intentar obtener un chiste.",
+          },
+        ],
+      };
+    }
   }
 );
 
