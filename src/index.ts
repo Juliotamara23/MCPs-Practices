@@ -1,10 +1,9 @@
+const express = require("express");
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Request, Response } from "express";
 import z from "zod";
 import path from "path";
-
-const express = require("express");
 
 const server = new McpServer({
   name: "StreamableHTTPServer",
@@ -12,6 +11,7 @@ const server = new McpServer({
 });
 
 const app = express();
+const port = 8000;
 
 // Esquema de validación para el mensaje enviado por el cliente.
 const messageSchema = z.string().min(1, "El mensaje no puede estar vacío.");
@@ -88,10 +88,20 @@ server.tool(
 );
 
 // Inicializando el servidor
-const PORT = 8000;
-app.listen(PORT, () => {
-  console.log(`✅ El servidor se levanto correctamente en el puerto ${PORT}`);
-}),
-  (error: string) => {
-    console.error(`❌ El servidor no pudo iniciar: ${error}`);
-  };
+async function main() {
+  try {
+    const transport = new StreamableHTTPServerTransport(app);
+    await server.connect(transport);
+    app.listen(port, () => {
+      console.log(`🚀 MCP server started on port ${port}`);
+    });
+  } catch (error) {
+    console.error("❌ Error al iniciar el servidor:", error);
+    process.exit(1);
+  }
+}
+
+main().catch((error: string) => {
+  console.error(`❌ Error al iniciar el servidor: ${error}`);
+  process.exit(1);
+});
