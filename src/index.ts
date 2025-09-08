@@ -42,6 +42,51 @@ app.get("/stream", async (req: Request, res: Response) => {
   res.end();
 });
 
+// Definiendo la herramienta del servidor
+server.tool(
+  "process_file",
+  {
+    description:
+      "Una herramienta que simula el procesamiento de archivos y envia notificicaciones",
+    inputSchema: {
+      message: z.string().describe("El mensaje para procesar con los archivos"),
+    },
+  },
+
+  // Revisar el tipo de ctx
+  async (args, ctx: any) => {
+    try {
+      const { message } = args;
+      const files = ["file_1.txt", "file_2.txt", "file_3.txt"];
+      for (const [idx, file] of files.entries()) {
+        await ctx.info(`Processing ${file} (${idx + 1}/${files.length})...`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      await ctx.info("Todos los archivos procesados.");
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Archivos procesados: ${files.join(
+              ", "
+            )} | Mensaje: ${message}`,
+          },
+        ],
+      };
+    } catch (error) {
+      console.error("Error en la herramienta 'process_files':", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Ocurrió un error al procesar los archivos. Por favor, inténtelo de nuevo.",
+          },
+        ],
+      };
+    }
+  }
+);
+
 // Inicializando el servidor
 const PORT = 8000;
 app.listen(PORT, () => {
