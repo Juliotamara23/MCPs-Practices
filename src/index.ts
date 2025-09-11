@@ -25,6 +25,7 @@ const server = new Server(
 
 // 🚀 Inicializar la app Express y los transports
 const app = express();
+app.use(express.json()); // Middleware para parsear JSON
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
 /**
@@ -109,7 +110,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new Error("Unknown tool");
   }
 });
-
 
 /**
  * Endpoint principal MCP (POST).
@@ -229,5 +229,7 @@ app.delete("/mcp", async (req: Request, res: Response) => {
  */
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`✅ El servidor classic HTTP streaming se conecto correctamente en http://localhost:${PORT}`);
+  console.log(
+    `✅ El servidor classic HTTP streaming se conecto correctamente en http://localhost:${PORT}`
+  );
 });
