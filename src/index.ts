@@ -1,131 +1,63 @@
+import express from "express";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { Request, Response } from "express";
 import {
   CallToolRequestSchema,
+  isInitializeRequest,
   ListToolsRequestSchema,
   TextContent,
 } from "@modelcontextprotocol/sdk/types.js";
-
-import express from "express";
 import { randomUUID } from "node:crypto";
 
 // 🛠️ Crear la instancia del servidor MCP
-const server = new Server({
-  name: "StreamableHTTPServer Files",
-  version: "1.0.0",
-});
+const server = new Server(
+  {
+    name: "StreamableHTTPServerTransport",
+    version: "1.0.1",
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  }
+);
 
 // 🚀 Inicializar la app Express y los transports
 const app = express();
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
 /**
- * Endpoint para el streaming de datos.
- * Esta ruta simula el procesamiento de una lista de archivos y envía notificaciones en tiempo real.
+ * Endpoint de prueba.
+ * Verificar que el servidor esté funcionando.
  */
-app.get("/stream", async (req, res) => {
+app.get("/", async (_: Request, res: Response) => {
+  res.send("Bienvenido al servidor de streaming HTTP");
+});
+
+/**
+ * 📢 Endpoint para classic HTTP streaming
+ * Simula el procesamiento de archivos y envía notificaciones de progreso.
+ */
+app.get("/stream", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/plain");
+
   const message = req.query.message || "Hola";
 
-  res.setHeader("Content-Type", "text/plain");
-  res.setHeader("Transfer-Encoding", "chunked");
-  res.flushHeaders();
+  res.write(
+    `Conectado en http://localhost:3001/stream con el mensaje: ${message}\n`
+  );
+  res.write("--- Streaming Progress ---\n");
 
-  const files = [1, 2, 3];
-  const totalFiles = files.length;
-
-  try {
-    // Enviar mensaje de bienvenida
-    res.write("--- Streaming Progress ---\n");
-
-    // Simular el procesamiento de cada archivo
-    for (const fileIndex of files) {
-      const notification = `Processing file ${fileIndex}/${totalFiles}...\n`;
-      res.write(notification);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
-    // Enviar el contenido final
-    res.write(`Here's the file content: ${message}\n`);
-    res.write("--- Stream Ended ---\n");
-
-    res.end();
-  } catch (error) {
-    console.error("Error durante el streaming:", error);
-    if (!res.headersSent) {
-      res.status(500).end();
-    }
+  const totalFiles = 3;
+  for (let i = 1; i <= totalFiles; i++) {
+    res.write(`Processing file ${i}/${totalFiles}...\n`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-});
 
-/**
- * Endpoint principal MCP (POST).
- * Maneja la lógica de sesiones y peticiones.
- */
-app.post("/mcp", async (req, res) => {
-  try {
-    let transport: StreamableHTTPServerTransport;
-    const sessionId = req.headers["mcp-session-id"] as string;
-
-    if (sessionId && transports[sessionId]) {
-      transport = transports[sessionId];
-    } else {
-      transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: () => randomUUID(),
-        onsessioninitialized: (newSessionId) => {
-          transports[newSessionId] = transport;
-        },
-      });
-      transport.onclose = () => {
-        if (transport.sessionId) {
-          delete transports[transport.sessionId];
-        }
-      };
-
-      await server.connect(transport);
-    }
-    await transport.handleRequest(req, res, req.body);
-  } catch (error) {
-    if (!res.headersSent) {
-      res.status(500).json({
-        jsonrpc: "2.0",
-        error: { code: -32603, message: "Internal server error" },
-      });
-    }
-  }
-});
-
-/**
- * Endpoint para conectar el cliente y recibir eventos en tiempo real.
- */
-app.get("/mcp", async (req, res) => {
-  const sessionId = req.headers["mcp-session-id"] as string;
-  if (!sessionId || !transports[sessionId]) {
-    return res.status(400).json({
-      jsonrpc: "2.0",
-      error: {
-        code: -32000,
-        message: "Bad Request: No valid session ID provided",
-      },
-    });
-  }
-  await transports[sessionId].handleRequest(req, res);
-});
-
-/**
- * Endpoint para terminar la sesión MCP.
- */
-app.delete("/mcp", async (req, res) => {
-  const sessionId = req.headers["mcp-session-id"] as string;
-  if (!sessionId || !transports[sessionId]) {
-    return res.status(400).json({
-      jsonrpc: "2.0",
-      error: {
-        code: -32000,
-        message: "Bad Request: No valid session ID provided",
-      },
-    });
-  }
-  await transports[sessionId].handleRequest(req, res);
+  res.write(`Here's the file content: ${message}\n`);
+  res.write("--- Stream Ended ---\n");
+  res.end();
 });
 
 // 🛠️ Configurar el manejador para la herramienta `process_files`
@@ -178,10 +110,124 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// 🚦 Iniciar el servidor
+
+/**
+ * Endpoint principal MCP (POST).
+ */
+app.post("/mcp", async (req, res) => {
+  console.log("📨 Recibida petición MCP POST");
+
+  try {
+    const sessionId = req.headers["mcp-session-id"] as string | undefined;
+
+    let transport: StreamableHTTPServerTransport;
+
+    if (sessionId && transports[sessionId]) {
+      transport = transports[sessionId];
+    } else if (!sessionId && isInitializeRequest(req.body)) {
+      transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => randomUUID(),
+        onsessioninitialized: (sessionId) => {
+          transports[sessionId] = transport;
+        },
+      });
+      transport.onclose = () => {
+        if (transport.sessionId) {
+          delete transports[transport.sessionId];
+        }
+      };
+
+      await server.connect(transport);
+    } else {
+      res.status(400).json({
+        jsonrpc: "2.0",
+        error: {
+          code: -32000,
+          message: "Bad Request: No valid session ID provided",
+        },
+        id: req?.body?.id,
+      });
+      return;
+    }
+
+    await transport.handleRequest(req, res, req.body);
+  } catch (error) {
+    console.error("❌ Error manejando petición MCP:", error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: "2.0",
+        error: {
+          code: -32603,
+          message: "Internal server error",
+        },
+        id: req?.body?.id,
+      });
+      return;
+    }
+  }
+});
+
+/**
+ * Endpoint GET para SSE streams (usado por MCP para eventos).
+ */
+app.get("/mcp", async (req: Request, res: Response) => {
+  const sessionId = req.headers["mcp-session-id"] as string | undefined;
+  if (!sessionId || !transports[sessionId]) {
+    res.status(400).json({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Bad Request: No valid session ID provided",
+      },
+      id: req?.body?.id,
+    });
+    return;
+  }
+
+  const transport = transports[sessionId];
+  await transport!.handleRequest(req, res);
+});
+
+/**
+ * Endpoint DELETE para terminar sesión MCP.
+ */
+app.delete("/mcp", async (req: Request, res: Response) => {
+  const sessionId = req.headers["mcp-session-id"] as string | undefined;
+  if (!sessionId || !transports[sessionId]) {
+    res.status(400).json({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Bad Request: No valid session ID provided",
+      },
+      id: req?.body?.id,
+    });
+    return;
+  }
+
+  try {
+    const transport = transports[sessionId];
+    await transport!.handleRequest(req, res);
+  } catch (error) {
+    console.error("❌ Error al terminar sesión:", error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: "2.0",
+        error: {
+          code: -32603,
+          message: "Error handling session termination",
+        },
+        id: req?.body?.id,
+      });
+      return;
+    }
+  }
+});
+
+/**
+ * 🚀 Iniciar el servidor
+ */
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(
-    `✅ El servidor classic HTTP streaming se conecto correctamente en http://localhost:${PORT}/`
-  );
+  console.log(`✅ El servidor classic HTTP streaming se conecto correctamente en http://localhost:${PORT}`);
 });
