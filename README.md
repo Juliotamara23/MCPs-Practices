@@ -1,4 +1,4 @@
-# Calculator Server con Model Context Protocol
+# <h1 align="center">Calculator Server con Model Context Protocol</h1>
 
 El presente proyecto es un servidor MCP (Model Context Protocol) que ofrece varias herramientas útiles para realizar cálculos básicos y personalizados. El objetivo principal de este proyecto es practicar lo aprendido durante el curso de **MCP for beginers**: `https://github.com/microsoft/mcp-for-beginners`.
 
