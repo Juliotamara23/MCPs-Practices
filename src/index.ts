@@ -1,30 +1,38 @@
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  McpServer,
+  ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-// Create MCP server
+// Create an MCP server
 const server = new McpServer({
-    name: "calculator-mcp",
-    version: "1.0.0"
-})
+  name: "calculator-mcp",
+  version: "1.0.0",
+});
 
 // Define tools
-server.tool(
-    "add",
-    { a: z.number(), b: z.number() },
-    async ({ a, b }) => ({
-        content: [{ type: "text", text: String(a + b) }]
-    })
-)
+server.tool("add", { a: z.number(), b: z.number() }, async ({ a, b }) => ({
+  content: [{ type: "text", text: String(a + b) }],
+}));
 
-// Define a greeting resources
+// Add a dynamic greeting resource
 server.resource(
-    "greeting",
-    new ResourceTemplate("greeting://{name}", { list: undefined }),
-    async (uri, { name }) => ({
-        contents: [{ uri: uri.href, text: `Hello, ${name}!` }]
-    })
-)
+  "greeting",
+  new ResourceTemplate("greeting://{name}", { list: undefined }),
+  async (uri, { name }) => ({
+    contents: [{ uri: uri.href, text: `Hello, ${name}!` }],
+  })
+);
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+// Start receiving messages on stdin and sending messages on stdout
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.log("MCPServer started on stdin/stdout");
+}
+
+main().catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
