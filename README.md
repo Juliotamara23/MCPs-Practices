@@ -33,25 +33,25 @@ source venv/bin/activate      # On Linux/macOS
 3.  Instale las dependencias: `pip install -r requirements.txt`
 4.  Ejecución:
 
-  1 . Servidor:
+    1 . Servidor:
 
-  Para iniciar el servidor con MCP (HTTP Streamable):
+    Para iniciar el servidor con MCP (HTTP Streamable):
 
-    python src/server.py mcp
+        python src/server.py mcp
 
-  Para iniciar el servidor con HTTP Streaming clásico:
+    Para iniciar el servidor con HTTP Streaming clásico:
 
-    python src/server.py
+        python src/server.py
 
-  2 . Cliente:
-    
-  Para ejecutar el cliente MCP (HTTP Streamable):
+    2 . Cliente:
+        
+    Para ejecutar el cliente MCP (HTTP Streamable):
 
-    python src/client.py mcp
+        python src/client.py mcp
 
-  Para ejecutar el cliente de HTTP Streaming clásico:
+    Para ejecutar el cliente de HTTP Streaming clásico:
 
-    python src/client.py
+        python src/client.py
 
 ## Características
 
