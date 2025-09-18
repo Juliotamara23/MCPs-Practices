@@ -16,9 +16,9 @@ logger = logging.getLogger('mcp_client')
 
 class LoggingCollertor:
     def __init__(self):
-        self.log_message: list[types.LoggingMessageNotificationParams] = []
+        self.log_messages: list[types.LoggingMessageNotificationParams] = []
     async def __call__(self, params: types.LoggingMessageNotificationParams) -> None:
-        self.log_message.append(params)
+        self.log_messages.append(params)
         logger.info("MCP Log: %s - %s", params.level, params.data)
 
 logging_collector = LoggingCollertor()
@@ -41,7 +41,7 @@ async def message_handler(
     else:
         logger.info("SERVER_MESSAGE: %s", message)
 
-# 🚀 Iniciando el servidor MCP
+# 🚀 Iniciando el servidor MCP de HTTP Streamable
 async def main ():
     logger.info("🚀 iniciando cliente...")
     async with streamablehttp_client(f"http://localhost:{port}/mcp") as (
@@ -61,12 +61,28 @@ async def main ():
             id_after = session_callback()
             logger.info("ID session despues de la inicialización: %s", id_after)
             logger.info("Session iniciada: listo para listar la herramienta")
-            tool_result = await session.call_tool("process_files", {"message:" "Hola por parte del cliente"})
+            tool_result = await session.call_tool("process_files", {"message": "Hola por parte del cliente"})
             logger.info("Resultado: %s", tool_result)
-            if logging_collector.log_message:
+            if logging_collector.log_messages:
                 logger.info("Recopilando mensajes de logs")
-                for log in logging_collector.log_message:
+                for log in logging_collector.log_messages:
                     logger.info("log: %s", log)
+
+# 🚀 Función de cliente HTTP de streaming clasico
+def stream_progress(message="Hola", url="http://localhost:8000/stream"):
+    params = {"message": message}
+    logger.info("Conectando! %s con el mensaje: %s, url, message")
+    try:
+        with requests.get(url, params=params, stream=True, timeout=10) as r:
+            r.raise_for_status()
+            for line in r.iter_lines():
+                if line:
+                    #  imprimiendo el contenido transmitido en stdout para visibilidad
+                    decoded_line = line.decode().strip()
+                    print(decoded_line)
+                    logger.debug("Contenido del stream: %s", decoded_line)
+    except requests.RequestException as e:
+        logger.error("Se prosento un error en el stream %s", e)
 
 if __name__ == "__main__":
     import sys
@@ -77,3 +93,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     else:
         # Cliente HTTP clasico
+        logger.info("🚀 Cliente de HTTP de streaming clasico ejecutandose...")
+        stream_progress()
