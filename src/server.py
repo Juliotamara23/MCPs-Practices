@@ -10,11 +10,8 @@ import uvicorn
 mcp = FastMCP("MCP Server HTTP Streamable")
 app = FastAPI()
 
-'''
-    📢 Endpoint de prueba.
-    Verificar que el servidor esté funcionando.
-'''
 
+# 📢 Endpoint principal para HTTP Streamable.
 @app.get("/", response_class=HTMLResponse)
 async def root():
     html_path = os.path.join(os.path.dirname(__file__), "index.html")
@@ -36,7 +33,6 @@ async def event_stream(message: str):
 @app.get("/stream")
 async def stream_file(message: str = "Hola"):
     return StreamingResponse(event_stream(message), media_type="text/plain")
-
 
 # 🛠️ Configurar el handler para la herramienta `process_files`
 @mcp.tool(description="Simula el procesamiento de archivos y envía notificaciones de progreso.")
