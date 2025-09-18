@@ -1,4 +1,4 @@
-# Calculator Client con Model Context Protocol
+# <h1 aling='center'> Calculator Client con Model Context Protocol </h1>
 
 El presente proyecto es un cliente MCP (Model Context Protocol) que interactúa con un servidor MCP para realizar cálculos básicos y personalizados. Este proyecto forma parte de las prácticas realizadas durante el curso de **MCP for beginners**: `https://github.com/microsoft/mcp-for-beginners`.
 
