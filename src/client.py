@@ -40,3 +40,40 @@ async def message_handler(
         logger.info("REQUEST_RESPONDER: %s", message)
     else:
         logger.info("SERVER_MESSAGE: %s", message)
+
+# 🚀 Iniciando el servidor MCP
+async def main ():
+    logger.info("🚀 iniciando cliente...")
+    async with streamablehttp_client(f"http://localhost:{port}/mcp") as (
+        read_stream,
+        write_stream,
+        session_callback,
+    ):
+        async with ClientSession(
+            read_stream,
+            write_stream,
+            logging_callback=logging_collector,
+            message_handler=message_handler,
+        ) as session:
+            id_before = session_callback(),
+            logger.info("ID session antes de la inicialización: %s", id_before)
+            await session.initialize()
+            id_after = session_callback()
+            logger.info("ID session despues de la inicialización: %s", id_after)
+            logger.info("Session iniciada: listo para listar la herramienta")
+            tool_result = await session.call_tool("process_files", {"message:" "Hola por parte del cliente"})
+            logger.info("Resultado: %s", tool_result)
+            if logging_collector.log_message:
+                logger.info("Recopilando mensajes de logs")
+                for log in logging_collector.log_message:
+                    logger.info("log: %s", log)
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "mcp":
+        # Cliente de MCP
+        logger.info("🚀 Cliente HTTP streamable ejecutandose...")
+        asyncio.run(main())
+    else:
+        # Cliente HTTP clasico
