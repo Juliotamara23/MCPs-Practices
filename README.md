@@ -11,7 +11,7 @@ El presente proyecto es un cliente MCP (Model Context Protocol) que interactúa 
 
 ## Instalación y ejecución del proyecto
 
-1.  Clone el repositorio localmente: `git clone -b 0.2-calculator-client https://github.com/username/calculator-client.git`
+1.  Clone el repositorio localmente: `git clone -b 0.2-calculator-client https://github.com/Juliotamara23/MCPs-Practices.git`
 2.  Instale las dependencias: `npm install`
 3.  Ejecute el cliente MCP con el siguiente comando: `npm start`
 
