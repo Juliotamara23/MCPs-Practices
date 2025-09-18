@@ -37,29 +37,21 @@ source venv/bin/activate      # On Linux/macOS
 
   Para iniciar el servidor con MCP (HTTP Streamable):
 
-    ```bash
     python src/server.py mcp
-    ```
 
   Para iniciar el servidor con HTTP Streaming clásico:
 
-    ```bash
     python src/server.py
-    ```
 
   2 . Cliente:
     
   Para ejecutar el cliente MCP (HTTP Streamable):
 
-    ```bash
     python src/client.py mcp
-    ```
 
   Para ejecutar el cliente de HTTP Streaming clásico:
 
-    ```bash
     python src/client.py
-    ```
 
 ## Características
 
